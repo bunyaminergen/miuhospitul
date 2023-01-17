@@ -44,7 +44,7 @@ matplotlib==3.5.3
 matplotlib-inline==0.1.6
 missingno==0.5.1
 nest-asyncio==1.5.6
-numpy==1.23.5
+numpy==1.21.6
 opencv-python==4.6.0.66
 openpyxl==3.0.10
 packaging==22.0
