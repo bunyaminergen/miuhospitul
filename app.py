@@ -1,18 +1,41 @@
+########################################################################################################################
+########################################################################################################################
+# Miuhospitul
+########################################################################################################################
+########################################################################################################################
+
 import streamlit as st
+
 import numpy as np
 import pandas as pd
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from model_methods import predict
+import pickle
 
-classes = {0:'Diabetes',1:'No Diabetes'}
+def predict(arr):
+    # Load the model
+    with open('final_model.sav', 'rb') as f:
+        model = pickle.load(f)
+    classes = {0:'Diyabetsiniz!',1:'Diyabet değilsiniz!'}
+
+    # return prediction as well as class probabilities
+
+    preds = model.predict_proba([arr])[0]
+
+    return (classes[np.argmax(preds)], preds)
+
+classes = {0:'Diyabetsiniz!',1:'Diyabet değilsiniz!'}
 
 class_labels = list(classes.values())
 
-st.title("Diabetes Predict")
-st.markdown('**Objective** : Given details about your contidion and we will show you ... ')
-st.markdown('The model can predict if it belongs to the following three Categories : **Diabetes , not diabetes** ')
+st.title("Miuhospitul Hastahanesi")
+
+st.title("Diyabet Tahmin Yapay Zeka Uygulamasına Hoş Geldiniz !")
+
+st.markdown("**Yapay Zeka** : Lütfen diyabet olup olmadığınızı öğrenmek için aşağıdaki bilgileri doldurunuz ! ")
+st.markdown("Bilgileri doldurduktan sonra Enter'a basınız. Sonuçlar : **Diyabetsiniz** veya **Diyabet değilsiniz** şeklinde görünecektir !")
 
 def predict_class():
 
@@ -73,17 +96,15 @@ def predict_class():
 
     result, probs = predict(data)
 
-    st.write("The predicted class is ",result)
+    st.write("**Sonuç:**",result)
 
     probs = [np.round(x,2) for x in probs]
 
-    print(probs)
-
     ax = sns.barplot(x = probs,y =class_labels, palette="winter", orient='h')
 
-    ax.set_yticklabels(class_labels,rotation=0)
+    ax.set_yticklabels(class_labels, rotation=0)
 
-    plt.title("Probabilities of the Data belonging to each class")
+    plt.title("Diyabet olma ihtimaliniz !")
 
     for index, value in enumerate(probs):
         plt.text(value, index,str(value))
@@ -91,25 +112,31 @@ def predict_class():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.pyplot()
 
-st.markdown("**Please enter the details of health**")
+st.markdown("**Lütfen bilgileri doldurunuz**")
 
-AGE                  = float(st.number_input('Enter AGE'))
-SEX                  = float(st.number_input('Enter SEX'))
-HIGHCHOL             = float(st.number_input('Enter HIGHCHOL'))
-CHOLCHECK            = float(st.number_input('Enter CHOLCHECK'))
-BMI                  = float(st.number_input('Enter BMI'))
-SMOKER               = float(st.number_input('Enter SMOKER'))
-HEARTDISEASEORATTACK = float(st.number_input('Enter HEARTDISEASEORATTACK'))
-PHYSACTIVITY         = float(st.number_input('Enter PHYSACTIVITY'))
-FRUITS               = float(st.number_input('Enter FRUITS'))
-VEGGIES              = float(st.number_input('Enter VEGGIES'))
-HVYALCOHOLCONSUMP    = float(st.number_input('HVYALCOHOLCONSUMP'))
-GENHLTH              = float(st.number_input('Enter GENHLTH'))
-MENTHLTH             = float(st.number_input('Enter MENTHLTH'))
-PHYSHLTH             = float(st.number_input('Enter PHYSHLTH'))
-DIFFWALK             = float(st.number_input('Enter DIFFWALK'))
-STROKE               = float(st.number_input('Enter STROKE'))
-HIGHBP               = float(st.number_input('Enter HIGHBP'))
+Input_Age = float(st.number_input('Yaşınız'))
+AGE                  = float((1 if 17<Input_Age<25 else 2 if 24<Input_Age<30 else 3 if 29<Input_Age<35 else 4 if 34<Input_Age<40 else 5 if 39<Input_Age<45 else 6 if 44<Input_Age<50 else 7 if 49<Input_Age<55 else 8 if 54<Input_Age<60 else 9 if 59<Input_Age<65 else 10 if 64<Input_Age<70 else 11 if 69<Input_Age<75 else 12 if 74<Input_Age<80 else 13 if Input_Age>79 else 0))
+
+SEX                  = float(st.number_input("Cinsiyetiniz (**Erkek = 1** , **Kadın = 0**)"))
+HIGHCHOL             = float(st.number_input("Yüksek Kolesterol (**Varsa = 1** , **Yoksa = 0**)"))
+CHOLCHECK            = float(st.number_input("Son 5 senede kolesterol kontrolü yaptırdınız mı ? (**Evet = 1** , **Hayır = 0**)"))
+
+BOY                  = float(st.number_input('Boyunuz nedir ? ', value = 1))
+KILO                 = float(st.number_input('Kilonuz nedir ? ', value = 1))
+BMI                  = (KILO / (BOY**2))
+
+SMOKER               = float(st.number_input('Sigara içiyor musunuz ? (**Evet = 1** , **Hayır = 0**)'))
+HEARTDISEASEORATTACK = float(st.number_input("Koroner Kalp Hastalığız var mı ? (**Evet = 1** , **Hayır = 0**)"))
+PHYSACTIVITY         = float(st.number_input('Son 30 günde fiziksel aktivite yaptınız mı ? (**Evet = 1** , **Hayır = 0**)'))
+FRUITS               = float(st.number_input('Günde en az 1 meyve tüketiyor musunuz ? (**Evet = 1** , **Hayır = 0**)'))
+VEGGIES              = float(st.number_input('Günde en az 1 sebze tüketiyor musunuz ? (**Evet = 1** , **Hayır = 0**)'))
+HVYALCOHOLCONSUMP    = float(st.number_input("Haftada 10 bardaktan fazla alkol tüketiyor musunuz ? (**Evet = 1** , **Hayır = 0**)"))
+GENHLTH              = float(st.number_input("Genel sağlık durumunuz nedir? (**Muhteşem = 1** , **Çok iyi = 2**, **İyi = 3**, **İyi değil = 4**, **Kötü = 5**)"))
+MENTHLTH             = float(st.number_input("Son 30 günde kendinizi psikolojik olarak kötü hissetiğiniz gün sayısı nedir ? "))
+PHYSHLTH             = float(st.number_input("Son 30 günde fiziksel sakatlık ve/veya yaralanma geçirdiğiniz gün sayısı nedir ? " ))
+DIFFWALK             = float(st.number_input("Yürümekte ya da merdiven çıkmakta zorlanıyor musunuz ? (**Evet = 1** , **Hayır = 0**)"))
+STROKE               = float(st.number_input("Hiç inme geçirdiniz mi ? (**Evet = 1** , **Hayır = 0**)"))
+HIGHBP               = float(st.number_input("Yüksek Tansiyonunuz var mı ? (**Evet = 1** , **Hayır = 0**)"))
 
 NEW_MENT_GEN            = MENTHLTH * GENHLTH
 NEW_MENT_PHY            = MENTHLTH * PHYSHLTH
@@ -160,39 +187,10 @@ NEW_PHYSACT_HEARTATTACK = PHYSACTIVITY + HEARTDISEASEORATTACK
 NEW_PHYSACT_HIGHCHOL    = PHYSACTIVITY + HIGHCHOL
 NEW_PHYSACT_STROKE      = PHYSACTIVITY + STROKE
 
-if st.button("Predict"):
+if st.button("Enter"):
     predict_class()
-
-"""
-# (MENTHLTH*GENHLTH), variable3, variable4]))
-
-AGE = [1 if 17<int(st.text_input('Age', ''))<25 else 2]
-c = 20
-
-d = [1 if 17<c<25 else 2 if 25<c<29 else 3 if 29<c<30]
-
-d
-
-# df["Bmi_Cat"] = [1 if i < 18.5 else 2 if 18.5<i<24.9 else 3 if 24.9<|i|<29.9 else 4 if 29.9<i<34.9 else 5 for i in df["Body_mass_index"]]
-
-[int(st.text_input('Enter Mental Health', '')) if ]
-
-# AgeGroups    Counts    AgeRange
-#    1.0         979      18-24
-#    2.0        1396      25-29
-#    3.0        2049      30-34
-#    4.0        2793      35-39
-#    5.0        3520      40-44
-#    6.0        4648      45-49
-#    7.0        6872      50-54
-#    8.0        8603      55-59
-#    9.0       10112      60-64
-#   10.0       10856      65-69
-#   11.0        8044      70-74
-#   12.0        5394      75-70
-#   13.0        5426        80+
-
-"""
 
 # pip3 freeze > requirements.txt  # Python3
 # pip freeze > requirements.txt  # Python2
+# streamlit run app.py
+
